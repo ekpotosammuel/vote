@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Candidate;
 use App\Http\Requests\StoreCandidateRequest;
 use App\Http\Requests\UpdateCandidateRequest;
+use Illuminate\Http\Request;
 
 class CandidateController extends Controller
 {
@@ -15,7 +16,11 @@ class CandidateController extends Controller
      */
     public function index()
     {
-        //
+        $candidate = Candidate::get();
+        return response()->json([
+            'message'   => 'All Candidate Record',
+            'data'      => $candidate
+        ]);
     }
 
     /**
@@ -36,7 +41,23 @@ class CandidateController extends Controller
      */
     public function store(StoreCandidateRequest $request)
     {
-        //
+        $this->validate($request,[
+            'firstName' =>  'required',
+            'lastName'  =>  'required',
+            'avatar'    =>  'required|mimes:png,jpg,jpeg,gif|max:2048',
+            'bio'       =>  'required'
+        ]);
+        $candidate = new Candidate();
+        $candidate->firstName = $request->input('firstName');
+        $candidate->lastName  = $request->input('lastName');
+        $candidate->avatar    = $request->file('avatar')->store('buckets/candidate/images');
+        $candidate->bio       = $request->input('bio');
+        $candidate->save();
+        return response()->json([
+            'message' => 'Candidate Created successful',
+            'data'    => $candidate
+        ], 201);
+
     }
 
     /**
@@ -45,32 +66,34 @@ class CandidateController extends Controller
      * @param  \App\Models\Candidate  $candidate
      * @return \Illuminate\Http\Response
      */
-    public function show(Candidate $candidate)
+    public function show(Candidate $candidate, $id)
     {
-        //
+        $candidate = Candidate::findorFail($id);
+        return response()->json([
+            'message' => 'Record',
+            'data'    => $candidate
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Candidate  $candidate
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Candidate $candidate)
+    public function update(UpdateCandidateRequest $request, Candidate $candidate, $id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateCandidateRequest  $request
-     * @param  \App\Models\Candidate  $candidate
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateCandidateRequest $request, Candidate $candidate)
-    {
-        //
+        $this->validate($request,[
+            'firstName' =>  'required',
+            'lastName'  =>  'required',
+            'avatar'    =>  'required|mimes:png,jpg,jpeg,gif|max:2048',
+            'bio'       =>  'required'
+        ]);
+        // return $request->all();
+        $candidate = Candidate::findorFail($id);
+        $candidate->firstName = $request->input('firstName');
+        $candidate->lastName  = $request->input('lastName');
+        $candidate->avatar    = $request->file('avatar')->store('buckets/candidate/images');
+        $candidate->bio       = $request->input('bio');
+        $candidate->save();
+        return response()->json([
+            'message' => 'Record Updated Successful',
+            'data'    => $candidate
+        ], 201);
     }
 
     /**

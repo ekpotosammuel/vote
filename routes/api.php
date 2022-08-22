@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CandidateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,5 +24,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/register', [RegistrationController::class, 'register']);
 Route::post('/login', [LoginController::class, 'login']);
-// Route::post('/user', [LoginController::class, 'getUser']);
-Route::get('/profile', [ProfileController::class, 'index']);
+Route::get('/profile/all', [ProfileController::class, 'getAll']);
+Route::get('/profile/{id}', [ProfileController::class, 'show']);
+Route::put('/profile/{id}', [ProfileController::class, 'update']);
+Route::get('/profile/user', [ProfileController::class, 'getCurrentUser']);
+
+Route::prefix('candidate')->group(function(){
+    Route::get('/',          [CandidateController::class, 'index']);
+    Route::post('/',         [CandidateController::class, 'store']);
+    Route::get('/{id}',      [CandidateController::class, 'show']);
+    Route::post('/{id}',      [CandidateController::class, 'update']);
+});

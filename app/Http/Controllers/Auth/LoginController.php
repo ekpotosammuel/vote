@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    public function login(Request $request)
-    {
+    public function login(Request $request){
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'status' => 'error',
@@ -28,8 +27,7 @@ class LoginController extends Controller
             "user" => $user
         ]);
     }
-    public function logout(Request $request)
-    {
+    public function logout(Request $request){
         session()->flush();
         session()->put('is_login', false);
         return redirect()->route('login');

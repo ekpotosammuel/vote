@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Profile;
 use App\Http\Requests\StoreProfileRequest;
 use App\Http\Requests\UpdateProfileRequest;
+use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
@@ -13,33 +14,24 @@ class ProfileController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function getAll()
     {
-        $user = auth('sanctum')->user();
-        $profile = profile::where('user_id', $user->id)->with('user')->first();
+
+        $profile = profile::get();
         return $profile;
     }
-
-    /**
-     * Show the form for creating a new resource.
+        /**
+     * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        //
-    }
+    // public function getCurrentUser()
+    // {
+    //     $user = auth('sanctum')->user();
+    //     $profile = profile::where('user_id', $user->id)->with('user')->first();
+    //     return $profile;
+    // }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\StoreProfileRequest  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(StoreProfileRequest $request)
-    {
-        //
-    }
 
     /**
      * Display the specified resource.
@@ -47,21 +39,12 @@ class ProfileController extends Controller
      * @param  \App\Models\Profile  $profile
      * @return \Illuminate\Http\Response
      */
-    public function show(Profile $profile)
+    public function show($id)
     {
-        //
+        $profile  = Profile::with('user')->findorFail([$id]);
+        return $profile;
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Profile  $profile
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Profile $profile)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -70,9 +53,22 @@ class ProfileController extends Controller
      * @param  \App\Models\Profile  $profile
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateProfileRequest $request, Profile $profile)
+    public function update(UpdateProfileRequest $request, Profile $profile, $id)
     {
-        //
+        $user = auth('sanctum')->user();
+        $this->validate($request, [
+            'avatar'=>'required|mimes:png,jpg,jpeg,gif|max:2048',
+            'contry'=>'required',
+            ]);
+        $profile  = Profile::findorFail($id);
+        // $profile  = Profile::findorFail($user->id);
+        $profile->user_id       = $user->id;
+        $profile->avatar        = $request->file('avatar')->store('buckets/images');
+        $profile->country       = $request->input('country');
+        $profile->update();
+        return response()->json([
+            'message' => 'registration successful'
+        ],201);
     }
 
     /**
